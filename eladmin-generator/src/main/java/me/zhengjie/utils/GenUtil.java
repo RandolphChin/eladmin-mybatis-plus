@@ -20,6 +20,7 @@ import cn.hutool.extra.template.*;
 import lombok.extern.slf4j.Slf4j;
 import me.zhengjie.domain.GenConfig;
 import me.zhengjie.domain.ColumnInfo;
+import me.zhengjie.exception.BadRequestException;
 import org.springframework.util.ObjectUtils;
 
 import java.io.File;
@@ -130,7 +131,8 @@ public class GenUtil {
         for (String templateName : templates) {
             Template template = engine.getTemplate("generator/front/" + templateName + ".ftl");
             String path = tempPath + "eladmin-web" + File.separator;
-            String apiPath = path + "src" + File.separator + "api" + File.separator;
+            //String apiPath = path + "src" + File.separator + "api" + File.separator;
+            String apiPath = path + "src" + File.separator + "api" + File.separator + genMap.get("changeClassName").toString() + File.separator;
             String srcPath = path + "src" + File.separator + "views" + File.separator + genMap.get("changeClassName").toString() + File.separator;
             String filePath = getFrontFilePath(templateName, apiPath, srcPath, genMap.get("changeClassName").toString());
             assert filePath != null;
@@ -345,6 +347,8 @@ public class GenUtil {
         Map<String, Object> genMap = new HashMap<>(16);
         // 接口别名
         genMap.put("apiAlias", genConfig.getApiAlias());
+        //
+        genMap.put("apiAlias", genConfig.getApiAlias());
         // 包名称
         genMap.put("package", genConfig.getPack());
         // 模块名称
@@ -385,6 +389,37 @@ public class GenUtil {
         genMap.put("hasDict", false);
         // 存在日期注解
         genMap.put("hasDateAnnotation", false);
+        // 前端 api 目录******
+        String separator = File.separator;
+        String[] paths;
+        String symbol = "\\";
+        if (symbol.equals(separator)) {
+            paths = genConfig.getApiPath().split("\\\\");
+        } else {
+            paths = genConfig.getApiPath().split(File.separator);
+        }
+        int pathsLength = paths.length;
+        int apiPathIndex= Arrays.asList(paths).indexOf("api");
+        if(apiPathIndex < 0){
+            throw new BadRequestException("全路径必须有api目录");
+        }
+        if(apiPathIndex+1 < pathsLength){
+            StringBuilder api = new StringBuilder();
+            for(int i=apiPathIndex;i<pathsLength;i++){
+                int next =i+1;
+                if(next >= pathsLength){
+                    break;
+                }
+                api.append(paths[next]);
+                api.append("/");
+            }
+            //String suffixStr = api.toString();
+            //suffixStr = suffixStr.substring(0,suffixStr.length()-1);
+            genMap.put("apiSuffix", api.toString());
+        }
+
+        // 前端 api 目录******
+
         // 保存字段信息
         List<Map<String, Object>> columns = new ArrayList<>();
         // 保存查询字段的信息

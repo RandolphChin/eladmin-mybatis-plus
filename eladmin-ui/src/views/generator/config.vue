@@ -175,10 +175,10 @@
               <el-input v-model="form.path" style="width: 40%" />
               <span style="color: #C0C0C0;margin-left: 10px;">输入views文件夹下的目录，不存在即创建</span>
             </el-form-item>
-            <!--            <el-form-item label="接口目录">-->
-            <!--              <el-input v-model="form.apiPath" style="width: 40%" />-->
-            <!--              <span style="color: #C0C0C0;margin-left: 10px;">Api存放路径[src/api]，为空则自动生成路径</span>-->
-            <!--            </el-form-item>-->
+            <el-form-item label="接口目录">
+              <el-input v-model="form.apiPath" style="width: 40%" />
+              <span style="color: #C0C0C0;margin-left: 10px;">Api存放路径[src/api]，为空则自动生成路径</span>
+            </el-form-item>
             <el-form-item label="去表前缀" prop="prefix">
               <el-input v-model="form.prefix" placeholder="默认不去除表前缀" style="width: 40%" />
               <span style="color: #C0C0C0;margin-left: 10px;">默认不去除表前缀，可自定义</span>

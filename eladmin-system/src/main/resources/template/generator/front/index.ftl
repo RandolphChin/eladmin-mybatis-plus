@@ -122,7 +122,11 @@
 </template>
 
 <script>
+<#if apiSuffix??>
+import crud${className} from '@/api/${apiSuffix}${changeClassName}'
+<#else>
 import crud${className} from '@/api/${changeClassName}'
+</#if>
 import CRUD, { presenter, header, form, crud } from '@crud/crud'
 import rrOperation from '@crud/RR.operation'
 import crudOperation from '@crud/CRUD.operation'

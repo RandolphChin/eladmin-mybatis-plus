@@ -44,6 +44,8 @@ public class QuartzConfig {
 	private final String DB_HOST ="DB_HOST";
 	private final String DB_PORT ="DB_PORT";
 	private final String DB_NAME ="DB_NAME";
+	private final String DB_USER ="DB_USER";
+	private final String DB_PWD ="DB_PWD";
 
 	/**
 	 * 解决Job中注入Spring Bean为null的问题
@@ -76,16 +78,24 @@ public class QuartzConfig {
 		propertiesFactoryBean.afterPropertiesSet();
 		// DB_HOST DB_PORT DB_NAME
 		Properties properties = propertiesFactoryBean.getObject();
+		// 设置 URL  Begin
 		String url =properties.getProperty("org.quartz.dataSource.qzDS.URL");
-		String dbPwd =properties.getProperty("org.quartz.dataSource.qzDS.password");
 		String dbHost = environment.getProperty(DB_HOST);
 		String dbPort = environment.getProperty(DB_PORT);
 		String dbName = environment.getProperty(DB_NAME);
 		String realUrl = this.resolveUrl(url,dbHost,dbPort,dbName);
 		properties.setProperty("org.quartz.dataSource.qzDS.URL",realUrl);
-		if(ObjectUtil.isNotNull(dbPwd)){
-			properties.setProperty("org.quartz.dataSource.qzDS.password",dbPwd);
-		}
+		// 设置 URL  End
+		// 设置数据库凭证 Begin
+		String dbPwd =properties.getProperty("org.quartz.dataSource.qzDS.password");
+		String dbUser =properties.getProperty("org.quartz.dataSource.qzDS.user");
+		String envUser = environment.getProperty(DB_USER);
+		String envPwd = environment.getProperty(DB_PWD);
+		String realPassword = handleParam(dbPwd,envPwd);
+		String realUser =handleParam(dbUser,envUser);
+		properties.setProperty("org.quartz.dataSource.qzDS.password",realPassword);
+		properties.setProperty("org.quartz.dataSource.qzDS.user",realUser);
+		// 设置数据库凭证 End
 		//创建SchedulerFactoryBean
 		SchedulerFactoryBean factory = new SchedulerFactoryBean();
 		factory.setQuartzProperties(properties);
@@ -109,9 +119,6 @@ public class QuartzConfig {
 		return scheduler;
 	}
 
-	private String replaceDBInfo(String url){
-		return null;
-	}
 
 	private String resolveUrl(String url,String DB_HOST,String DB_PORT,String DB_NAME){
 		String[] arr = url.split("\\/");
@@ -120,39 +127,23 @@ public class QuartzConfig {
 		String dbPort = "$" + hostAndPort[2];
 		String[] db = arr[3].split("\\?");
 		String dbName = db[0];
-		String host = handleHost(dbHost,DB_HOST);
+		String host = handleParam(dbHost,DB_HOST);
 		url = url.replace(dbHost,host);
-		String port = handlePort(dbPort,DB_PORT);
+		String port = handleParam(dbPort,DB_PORT);
 		url = url.replace(dbPort,port);
-		String name = handleName(dbName,DB_NAME);
+		String name = handleParam(dbName,DB_NAME);
 		url = url.replace(dbName,name);
 		return url;
 	}
-	private String handleHost(String dbHost,String envHost){
-		if(ObjectUtil.isNull(envHost)){
-			String[] hostArr = dbHost.split("\\:");
-			String ee = hostArr[1].replace("}","");
+	private String handleParam(String dbParam,String envParam){
+		if(ObjectUtil.isNull(envParam)){
+			String[] arr = dbParam.split("\\:");
+			String ee = arr[1].replace("}","");
 			return ee;
 		}else{
-			return envHost;
+			return envParam;
 		}
 	}
 
-	private String handlePort(String dbPort,String envPort){
-		if(ObjectUtil.isNull(envPort)){
-			String[] hostArr = dbPort.split("\\:");
-			return hostArr[1].replace("}","");
-		}else{
-			return envPort;
-		}
-	}
 
-	private String handleName(String dbName,String envName){
-		if(ObjectUtil.isNull(envName)){
-			String[] hostArr = dbName.split("\\:");
-			return hostArr[1].replace("}","");
-		}else{
-			return envName;
-		}
-	}
 }

@@ -35,6 +35,13 @@ public class ${className}Controller {
         return new ResponseEntity<>(${changeClassName}Service.queryAll(query,pageable),HttpStatus.OK);
     }
 
+    @ApiOperation("获取单个${apiAlias}")
+    @GetMapping(value = "/{id}")
+    @PreAuthorize("@el.check('${changeClassName}:list')")
+    public ResponseEntity<Object> query(@PathVariable ${pkColumnType} id){
+        return new ResponseEntity<>(${changeClassName}Service.findById(id), HttpStatus.OK);
+    }
+
     @PostMapping
     @Log("新增${apiAlias}")
     @ApiOperation("新增${apiAlias}")
